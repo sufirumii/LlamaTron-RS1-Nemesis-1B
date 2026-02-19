@@ -111,14 +111,32 @@ Script to load the LoRA adapter and merge it into the base model for efficient i
 Both files are self-contained and require only minor path adjustments before use.
 Performance Summary
 The training process showed smooth and consistent loss reduction across all 6,271 steps. The final validation loss of 1.45 reflects effective adaptation to the clinical reasoning domain without signs of overfitting.
-The images below show representative examples of training loss curves from similar QLoRA fine-tuning runs on Llama-3.2 models and a typical interface used for clinical reasoning deployment.
+
+Demo Screenshots
+
+<img width="1451" height="498" alt="1" src="https://github.com/user-attachments/assets/20190d7b-858b-4ffb-a5d2-2f101b18a01c" />
+
+<img width="1444" height="758" alt="2" src="https://github.com/user-attachments/assets/ca3aa3eb-6632-413c-b8bd-cbc1bbbc0be6" />
+
+
 Repository Contents
 text.
 ├── fine_tune_script.txt      # Complete fine-tuning code (copy-paste ready)
 ├── merge_script.txt          # LoRA merging code (copy-paste ready)
 ├── README.md                 # This document
 └── requirements.txt          # List of required Python packages
+
+
 License
 Apache 2.0
 The model weights, training code, and any derivative works are released under the Apache 2.0 license, in alignment with the base model and dataset.
 This project aims to contribute to the development of transparent, efficient, and high-quality open-source medical reasoning systems.
+text### Quick Tips for Adding Your Images
+1. Create a folder called `images/` (or `screenshots/`) in your repo root.
+2. Upload your two images there (e.g. `loss-curve.png` and `inference-example.png`).
+3. Update the paths like this:
+   ```markdown
+   ![Training Loss Curve](images/loss-curve.png)
+   ![Model Inference Example](images/inference-example.png)
+
+Commit and push — GitHub will display them perfectly.
