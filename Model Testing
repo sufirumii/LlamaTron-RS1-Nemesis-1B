@@ -1,0 +1,38 @@
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+
+MERGED_PATH = "/home/Fine Tuning Files/merged_model"
+
+# Load tokenizer and model
+print("Loading model...")
+tokenizer = AutoTokenizer.from_pretrained(MERGED_PATH)
+model = AutoModelForCausalLM.from_pretrained(
+    MERGED_PATH,
+    torch_dtype=torch.bfloat16,
+    device_map="auto",
+)
+
+# Create pipeline
+pipe = pipeline(
+    "text-generation",
+    model=model,
+    tokenizer=tokenizer,
+)
+
+# Test question
+messages = [
+    {"role": "system", "content": "You are a knowledgeable and compassionate medical assistant."},
+    {"role": "user",   "content": "What are the symptoms of Type 2 Diabetes?"},
+]
+
+print("\n🔍 Asking the model a medical question...\n")
+output = pipe(
+    messages,
+    max_new_tokens=300,
+    do_sample=True,
+    temperature=0.7,
+    top_p=0.9,
+)
+
+print("🤖 Model Response:")
+print(output[0]["generated_text"][-1]["content"])
