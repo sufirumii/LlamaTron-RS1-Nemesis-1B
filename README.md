@@ -1,21 +1,25 @@
 # LlamaTron RS1 Nemesis
 
-> **Base Model:** `meta-llama/Llama-3.2-1B-Instruct` fine-tuned on `OpenMed/Medical-Reasoning-SFT-MiniMax-M2.1`
+A 1B-parameter medical reasoning model, fine-tuned with QLoRA on 204K clinical reasoning conversations — trained end-to-end in under 4 hours on a single GPU.
 
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Model: Llama 3.2 1B](https://img.shields.io/badge/Base%20Model-Llama%203.2%201B-orange)](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct)
-[![Dataset: OpenMed](https://img.shields.io/badge/Dataset-OpenMed-green)](https://huggingface.co/datasets/OpenMed/Medical-Reasoning-SFT-MiniMax-M2.1)
-[![Method: QLoRA](https://img.shields.io/badge/Method-QLoRA-purple)](https://github.com/sufirumii/LlamaTron-RS1-Nemesis-1B)
-
----
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-38A169?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
+[![Base Model](https://img.shields.io/badge/Base-Llama%203.2%201B%20Instruct-4A5568?style=flat-square)](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct)
+[![Dataset](https://img.shields.io/badge/Dataset-204K%20samples-2B6CB0?style=flat-square)](https://huggingface.co/datasets/OpenMed/Medical-Reasoning-SFT-MiniMax-M2.1)
+[![Method](https://img.shields.io/badge/Method-QLoRA-7C3AED?style=flat-square)](https://github.com/sufirumii/LlamaTron-RS1-Nemesis-1B)
 
 ## Overview
 
-**LlamaTron RS1 Nemesis** is a compact medical reasoning model built by fine-tuning `meta-llama/Llama-3.2-1B-Instruct` using QLoRA on the `Medical-Reasoning-SFT-MiniMax-M2.1` dataset — 204,773 clinical reasoning conversations with full chain-of-thought traces covering differential diagnosis, treatment planning, pharmacology, and clinical case analysis.
+LlamaTron RS1 Nemesis is a compact medical reasoning model built by fine-tuning `meta-llama/Llama-3.2-1B-Instruct` with QLoRA on the `Medical-Reasoning-SFT-MiniMax-M2.1` dataset — 204,773 clinical reasoning conversations with full chain-of-thought traces covering differential diagnosis, treatment planning, pharmacology, and clinical case analysis.
 
 Despite being a 1-billion-parameter model, LlamaTron RS1 Nemesis handles complex clinical questions with structured, coherent reasoning, trained in under 4 hours on a single NVIDIA H200 GPU.
 
----
+## Architecture
+
+
+<img width="1800" height="1160" alt="image" src="https://github.com/user-attachments/assets/cdc51662-1eef-4d45-8317-4b5f4aeda232" />
+
+
+Only 5.6M of the model's 1.24B parameters are updated during training (0.45%) — the base weights stay frozen and quantized to 4-bit throughout, with the LoRA adapters carrying all of the learned clinical-reasoning behavior. This is what keeps a full fine-tuning run on 204K samples under 4 hours on a single GPU.
 
 ## Demo
 
@@ -27,26 +31,28 @@ Despite being a 1-billion-parameter model, LlamaTron RS1 Nemesis handles complex
 
 <img width="1444" height="758" alt="Model response example" src="https://github.com/user-attachments/assets/fdb45f6f-f983-4326-a9de-f792b6d7bdd5" />
 
----
-
 ## Training Setup
 
 | Parameter | Value |
 |-----------|-------|
-| Base Model | meta-llama/Llama-3.2-1B-Instruct |
+| Base model | meta-llama/Llama-3.2-1B-Instruct |
 | GPU | NVIDIA H200 |
 | Method | QLoRA (4-bit NF4 + LoRA) |
-| LoRA Rank | r=8, alpha=16 |
-| Trainable Parameters | 5.6M / 1.24B (0.45%) |
-| Effective Batch Size | 32 (8 x 4 accumulation steps) |
-| Learning Rate | 2e-4 (cosine schedule) |
+| LoRA rank | r=8, alpha=16 |
+| Trainable parameters | 5.6M / 1.24B (0.45%) |
+| Effective batch size | 32 (8 x 4 accumulation steps) |
+| Learning rate | 2e-4 (cosine schedule) |
 | Optimizer | paged_adamw_8bit |
-| Max Sequence Length | 512 |
+| Max sequence length | 512 |
 | Epochs | 1 |
-| Training Time | 3 hours 59 minutes |
-| Total Steps | 6,271 |
+| Training time | 3 hours 59 minutes |
+| Total steps | 6,271 |
 
 ## Training Results
+
+
+<img width="1600" height="840" alt="training-loss" src="https://github.com/user-attachments/assets/77ffac5b-0826-4c50-a3f3-1d4b53e159de" />
+
 
 | Step | Train Loss | Val Loss |
 |------|------------|----------|
@@ -58,9 +64,7 @@ Despite being a 1-billion-parameter model, LlamaTron RS1 Nemesis handles complex
 | 5000 | 1.4301 | 1.4567 |
 | 6271 | 1.4200 | 1.4500 |
 
-Loss decreased consistently across all 6,271 steps, with clean convergence and no overfitting observed.
-
----
+Loss decreased consistently across all 6,271 steps, with clean convergence and no overfitting observed — validation loss tracks training loss closely throughout rather than diverging.
 
 ## Dataset
 
@@ -68,13 +72,11 @@ Trained on [Medical-Reasoning-SFT-MiniMax-M2.1](https://huggingface.co/datasets/
 
 | Property | Value |
 |----------|-------|
-| Total Samples | 204,773 |
-| Estimated Tokens | ~621 Million |
+| Total samples | 204,773 |
+| Estimated tokens | ~621 million |
 | Format | Multi-turn chat with chain-of-thought reasoning |
 | License | Apache 2.0 |
 | Topics | Differential diagnosis, treatment planning, pharmacology, clinical case analysis |
-
----
 
 ## Usage
 
@@ -124,8 +126,6 @@ outputs = model.generate(**inputs, max_new_tokens=400, do_sample=True, temperatu
 print(tokenizer.decode(outputs[0][inputs["input_ids"].shape[-1]:], skip_special_tokens=True))
 ```
 
----
-
 ## Requirements
 
 ```
@@ -138,19 +138,30 @@ accelerate>=0.33.0
 datasets>=2.21.0
 ```
 
----
+## Limitations
+
+- Not evaluated against a clinical benchmark (e.g. MedQA, USMLE-style item banks) — the loss curves show clean convergence, not clinical accuracy
+- At 1B parameters and rank-8 LoRA, the model has materially less capacity than larger medical LLMs and is more prone to confident but incorrect statements
+- Trained on English-language conversations only
+- One training epoch over the dataset — samples were seen once, which limits how deeply any single reasoning pattern was reinforced
 
 ## Disclaimer
 
 LlamaTron RS1 Nemesis is intended for research and educational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider for medical decisions.
 
----
-
 ## Credits
 
 - **Dataset**: [Maziyar Panahi](https://www.linkedin.com/in/maziyar-panahi/), founder of [OpenMed](https://huggingface.co/OpenMed), for releasing the `Medical-Reasoning-SFT-MiniMax-M2.1` dataset openly under Apache 2.0
-- **Base Model**: Meta AI for releasing `Llama-3.2-1B-Instruct`
+- **Base model**: Meta AI for releasing `Llama-3.2-1B-Instruct`
 - **Libraries**: Hugging Face, PEFT, TRL, BitsAndBytes
+
+## Author
+
+Rumi Iqbal Sufi
+AI Engineer
+GitHub: https://github.com/sufirumii
+Hugging Face: https://huggingface.co/Rumiii
+LinkedIn: https://www.linkedin.com/in/rumi-sufi-6323a5265/
 
 ## License
 
